@@ -7,7 +7,7 @@ class Bet < ApplicationRecord
 
   before_validation :set_default_values
 
-  after_save :update_and_send_leaderboard
+  after_save_commit :update_and_send_leaderboard
 
   private
 
