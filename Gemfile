@@ -44,6 +44,20 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "faker"
+  gem "pry"
+  gem "dotenv-rails"
+  gem "shoulda-matchers", "~> 4.0"
 end
 
-
+gem "redis"
+gem "sidekiq" # For background jobs
+gem "jwt"
+gem "active_model_serializers"
+gem "rswag"
+gem "rswag-ui"
+gem "bcrypt"
+gem "kaminari"
