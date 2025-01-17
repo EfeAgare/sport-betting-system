@@ -6,13 +6,18 @@ class Api::V1::BetsController < ApplicationController
 
   def create
     @bet = current_user.bets.new(bet_params)
-    if @bet.save
-      # Clear the leaderboard cache
-      Rails.cache.delete("leaderboard_data")
-      render json: @bet, status: :created
-    else
-      render json: @bet.errors.full_messages, status: :unprocessable_entity
+
+    Bet.transaction do
+      if @bet.save
+        current_user.update!(balance: current_user.balance - @bet.amount)
+        Rails.cache.delete("leaderboard_data")
+        render json: @bet, status: :created
+      else
+        render json: @bet.errors.full_messages, status: :unprocessable_entity
+      end
     end
+  rescue ActiveRecord::RecordInvalid
+    render json: { error: "Unable to place bet. Please try again." }, status: :unprocessable_entity
   end
 
   def history

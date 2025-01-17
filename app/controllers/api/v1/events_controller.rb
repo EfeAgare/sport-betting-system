@@ -2,7 +2,6 @@ class Api::V1::EventsController < ApplicationController
   before_action :set_game, only: [ :create ]
   before_action :set_event, only: [ :update ]
 
-  # POST /games/:game_id/events
   def create
     @event = @game.events.build(event_params)
 
@@ -13,7 +12,6 @@ class Api::V1::EventsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /events/:id
   def update
     if @event.update(event_params)
       render json: @event, status: :ok
