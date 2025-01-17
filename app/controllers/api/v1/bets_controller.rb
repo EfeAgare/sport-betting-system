@@ -10,6 +10,7 @@ class Api::V1::BetsController < ApplicationController
     Bet.transaction do
       if @bet.save
         current_user.update!(balance: current_user.balance - @bet.amount)
+        # Ensure the leaderboard is always up-to-date after each bet.
         Rails.cache.delete("leaderboard_data")
         render json: @bet, status: :created
       else

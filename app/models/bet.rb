@@ -6,7 +6,8 @@ class Bet < ApplicationRecord
   validates :bet_type, :pick, :amount, presence: true
 
   before_validation :set_default_values
-  after_commit :update_game_odds
+
+  after_save :update_and_send_leaderboard
 
   private
 
@@ -14,7 +15,8 @@ class Bet < ApplicationRecord
     self.odds ||= 1 + rand * 4 # Random odds if not pre-set
   end
 
-  def update_game_odds
-    UpdateOddsJob.perform_later(self.game_id)
+  def update_and_send_leaderboard
+    # Trigger background job to calculate and send leaderboard
+    LeaderboardUpdateJob.perform_later
   end
 end
