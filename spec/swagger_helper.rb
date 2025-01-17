@@ -31,7 +31,7 @@ RSpec.configure do |config|
       },
       servers: [
         {
-          url: 'https://{defaultHost}',
+          url: 'http://{defaultHost}',
           variables: {
             defaultHost: {
               default: ENV.fetch('BASE_URL', 'localhost:3000')

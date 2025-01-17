@@ -9,6 +9,8 @@ class User < ActiveRecord::Base
 
   before_create :set_default_balance
 
+  has_many :bets, dependent: :destroy
+
   private
 
   def set_default_balance

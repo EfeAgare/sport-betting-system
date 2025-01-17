@@ -91,5 +91,5 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 =end
-  config.exclude_pattern = 'spec/requests/api/v1/*_swagger_spec.rb'
+  # config.exclude_pattern = 'spec/requests/api/v1/*_request_spec.rb'
 end
