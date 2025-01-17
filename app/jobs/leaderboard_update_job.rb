@@ -1,12 +1,12 @@
 class LeaderboardUpdateJob < ApplicationJob
   queue_as :default
 
-  def perform(bet)
+  def perform
     leaderboard = LeaderboardService.calculate
 
     leaderboard_data = leaderboard.as_json(only: [ :id, :username, :total_bets ])
 
-    # Now, publish the JSON string to Redis
+    # Publish the updated leaderboard data to Redis for real-time updates
     $redis.publish("leaderboard_updates", leaderboard_data.to_json)
   end
 end
