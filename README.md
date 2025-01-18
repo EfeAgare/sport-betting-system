@@ -1,68 +1,63 @@
-# Sports betting and leaderboard system
- The system should allow users to place bets, update odds dynamically, and maintain a live leaderboard of top bettors.
+# Sports Betting and Leaderboard System
+
+The system should allow users to place bets, update odds dynamically, and maintain a live leaderboard of top bettors.
 
 ## Technologies
-  * Ruby
-  * Git
-  * Rspec
-  * Sidekiq
-  * redis-server
-  * Postgres
+- Ruby
+- Git
+- RSpec
+- Sidekiq
+- Redis
+- PostgreSQL
 
 ## Setup
-- Ensure you have [ruby](https://rvm.io/rvm/install) installed on your device and also [redis](https://phoenixnap.com/kb/install-redis-on-mac) for background processes
-
-  ```
+1. Ensure you have [Ruby](https://rvm.io/rvm/install) installed on your device and also [Redis](https://phoenixnap.com/kb/install-redis-on-mac) for background processes.
+   ```
    Ruby = 3.3.6
-  ```
+   ```
 
-  Clone this repository and cd into the clone specific folder and run the following command 
-  accordingly
-
-
-  ```
+2. Clone this repository and navigate into the cloned folder, then run the following commands:
+   ```
    bundle install
-  ```
-
-  ```
+   ```
+   ```
    rails db:create 
-  ```
-
-  ```
+   ```
+   ```
    rails db:migrate
    rails db:seed
-  ```
+   ```
 
-  After to run server
-
-  ```
-  rails s
-  ```
-
-  ```
-  redis-server
-  ```
-
-  ```
+3. To run the server:
+   ```
+   rails s
+   ```
+   ```
+   redis-server
+   ```
+   ```
    sidekiq
-  ```
+   ```
 
 ## Test 
-To run all test
+To run all tests:
 ```
 bundle exec rspec 
 ```
+To run a specific test:
+```
+rspec 'relative path to file'
+```
 
-and to run a specific test 
- ```
- rspec 'relative path to file'
- ```
-
-To get the api-doc
-
-vist
-
+## API Documentation
+Visit the API documentation at:
+```
 base_url/api-docs/index.html
+```
 
-## Set Environment Variables
-Create a .env file in the root of your Rails project and follow the pattern of variables in env.example
+## Architecture
+The application follows the MVC (Model-View-Controller) architecture. The key components include:
+- **Models**: Represent the data and business logic.
+- **Views**: Handle the presentation layer.
+- **Controllers**: Manage the flow of data between models and views.
+

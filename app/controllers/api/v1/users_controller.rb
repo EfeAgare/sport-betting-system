@@ -2,17 +2,16 @@ class Api::V1::UsersController < ApplicationController
   allow_unauthenticated_access only: [ :index ]
 
   def index
+    validate_pagination!
     users = User.page(params[:page]).per(params[:per_page] || 25)
 
-    render json: users, status: :ok
+    render json: users, meta: pagination_meta(users),  status: :ok
   end
 
   def update
-    if current_user.update(user_params)
-      render json: current_user, status: :ok
-    else
-      render json: { errors: current_user.errors }, status: :unprocessable_entity
-    end
+    UserValidator.new(user_params).validate!
+    current_user.update!(user_params)
+    render json: current_user, status: :ok
   end
 
   private

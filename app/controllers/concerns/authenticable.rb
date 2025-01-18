@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Authenticable
   extend ActiveSupport::Concern
 
@@ -16,7 +14,9 @@ module Authenticable
   private
 
   def authenticate_user!
-    render json: { error: "Not Authorized" }, status: :unauthorized unless current_user
+    raise UnauthorizedError, "Authorization token is missing" unless token
+    raise UnauthorizedError, "Invalid or expired token" unless decoded_token
+    raise UnauthorizedError, "User not found" unless current_user
   end
 
   def current_user
