@@ -17,9 +17,9 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins "*" # we can later change to the domain of the our app
+    origins "*" # we can later change to the domain of our app
 
-    resource "*",
+    resource "/api/*",
              headers: :any,
              methods: %i[get post put patch delete options head],
              expose: %w[Authorization]
