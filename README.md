@@ -56,6 +56,10 @@ To deploy the application to Render, follow these steps:
    - Set the following environment variables in Render:
      - `RAILS_MASTER_KEY`: Your Rails master key.
      - `REDIS_URL`: The URL for your Redis instance.
+     - `DATABASE_URL`: The URL for your PostgreSQL database.
+     - `SECRET_KEY_BASE`: Your secret key base.
+     - `HMAC_SECRET`:  The secret used for signing tokens.
+     - `HMAC_ALGORITHM`: The algorithm used for HMAC signing.
 
 2. **Update `config/deploy.yml`**:
    - Ensure that the `config/deploy.yml` file is correctly configured with your application name, image, and server details.
