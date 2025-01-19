@@ -7,143 +7,110 @@ RSpec.describe 'Games API', type: :request do
       consumes 'application/json'
       produces 'application/json'
 
-      parameter name: :Authorization, in: :header, type: :string, required: true, description: 'Bearer token for authentication'
+      # Add the Api-Version header as a required parameter
+      parameter name: 'Api-Version', in: :header, type: :string, required: true, example: '1', description: 'API version to use'
+
       parameter name: :game, in: :body, schema: {
         type: :object,
         properties: {
-          game: {
-            type: :object,
-            properties: {
-              home_team: { type: :string, example: 'Team A', description: 'Home team name' },
-              away_team: { type: :string, example: 'Team B', description: 'Away team name' },
-              home_score: { type: :integer, example: 0, description: 'Home team score' },
-              away_score: { type: :integer, example: 0, description: 'Away team score' },
-              time_elapsed: { type: :integer, example: 0, description: 'Time elapsed in the game' },
-              status: { type: :string, example: 'scheduled', description: 'Status of the game (e.g., scheduled, ongoing, completed)' },
-              events_attributes: {
-                type: :array,
-                items: {
-                  type: :object,
-                  properties: {
-                    event_type: { type: :string, example: 'goal', description: 'Type of event (e.g., goal, foul)' },
-                    team: { type: :string, example: 'home', description: 'Team associated with the event' },
-                    player: { type: :string, example: 'Player 1', description: 'Player who made the event' },
-                    minute: { type: :integer, example: 10, description: 'Minute in which the event occurred' }
-                  },
-                  required: [ 'event_type', 'team', 'player', 'minute' ]
-                }
-              }
-            },
-            required: [ 'home_team', 'away_team', 'status' ]
+          home_team: { type: :string },
+          away_team: { type: :string },
+          home_score: { type: :integer },
+          away_score: { type: :integer },
+          status: { type: :string },
+          events_attributes: {
+            type: :array,
+            items: {
+              type: :object,
+              properties: {
+                event_type: { type: :string },
+                team: { type: :string },
+                player: { type: :string },
+                minute: { type: :integer }
+              },
+              required: [ 'event_type', 'team', 'player', 'minute' ]
+            }
           }
         },
-        required: [ 'game' ]
+        required: [ 'home_team', 'away_team', 'home_score', 'away_score', 'status' ]
       }
 
       response '201', 'Game created successfully' do
-        let(:Authorization) { "Bearer valid_token" }
         let(:game) do
           {
-            game: {
-              home_team: 'Team A',
-              away_team: 'Team B',
-              home_score: 0,
-              away_score: 0,
-              time_elapsed: 0,
-              status: 'scheduled'
-            }
+            home_team: 'Team A',
+            away_team: 'Team B',
+            home_score: 1,
+            away_score: 2,
+            status: 'finished',
+            events_attributes: [
+              { event_type: 'goal', team: 'Team A', player: 'Player 1', minute: 10 },
+              { event_type: 'goal', team: 'Team B', player: 'Player 2', minute: 20 }
+            ]
           }
         end
-
-        run_test! do |response|
+        run_test! do
+          expect(response).to have_http_status(:created)
           json_response = JSON.parse(response.body)
-          expect(json_response['home_team']).to eq('Team A')
-          expect(json_response['away_team']).to eq('Team B')
+          expect(json_response['home_team']).to eq(game[:home_team])
+          expect(json_response['away_team']).to eq(game[:away_team])
+          expect(json_response['home_score']).to eq(game[:home_score])
+          expect(json_response['away_score']).to eq(game[:away_score])
+          expect(json_response['status']).to eq(game[:status])
+          expect(json_response['events'].size).to eq(2)
         end
       end
 
-      response '201', 'Game created with events successfully' do
-        let(:Authorization) { "Bearer valid_token" }
-        let(:game) do
-          {
-            game: {
-              home_team: 'Team A',
-              away_team: 'Team B',
-              home_score: 0,
-              away_score: 0,
-              time_elapsed: 0,
-              status: 'scheduled',
-              events_attributes: [
-                { event_type: 'goal', team: 'home', player: 'Player 1', minute: 10 },
-                { event_type: 'foul', team: 'away', player: 'Player 2', minute: 20 }
-              ]
-            }
-          }
-        end
-
-        run_test! do |response|
+      response '422', 'Invalid request' do
+        let(:game) { { home_team: '', away_team: '', home_score: nil, away_score: nil, status: '' } }
+        run_test! do
+          expect(response).to have_http_status(:unprocessable_entity)
           json_response = JSON.parse(response.body)
-          expect(json_response['home_team']).to eq('Team A')
-          expect(json_response['away_team']).to eq('Team B')
-        end
-      end
-
-      response '422', 'Invalid game parameters' do
-        let(:Authorization) { "Bearer valid_token" }
-        let(:game) do
-          {
-            game: {
-              home_team: '',
-              away_team: '',
-              home_score: nil,
-              away_score: nil,
-              time_elapsed: nil,
-              status: 'scheduled'
-            }
-          }
-        end
-
-        run_test! do |response|
-          json_response = JSON.parse(response.body)
-          expect(json_response['errors']).to include("Home team can't be blank", "Away team can't be blank")
+          expect(json_response['error']['message']).to include("Home team can't be blank")
+          expect(json_response['error']['message']).to include("Away team can't be blank")
         end
       end
     end
   end
 
   path '/api/v1/games' do
-    get 'Get list of games' do
+    get 'Retrieves a list of games' do
       tags 'Games'
       produces 'application/json'
 
-      response '200', 'List of games' do
-        let(:Authorization) { "Bearer valid_token" }
+      parameter name: :start_date, in: :query, type: :string, format: 'date', description: 'Start date for filtering games'
+      parameter name: :end_date, in: :query, type: :string, format: 'date', description: 'End date for filtering games'
+      parameter name: :page, in: :query, type: :integer, description: 'Page number for pagination'
+      parameter name: :per_page, in: :query, type: :integer, description: 'Number of items per page'
 
-        run_test! do |response|
+      response '200', 'List of games retrieved successfully' do
+        let!(:games) { create_list(:game, 10) }
+        run_test! do
+          expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
-          expect(json_response).not_to be_empty
+          expect(json_response['games'].size).to eq(10)
+          expect(json_response['meta']).to include('current_page', 'total_pages', 'total_count', 'prev_page', 'next_page')
         end
       end
     end
   end
 
   path '/api/v1/games/{id}' do
-    get 'Show a game by ID' do
+    get 'Retrieves a single game' do
       tags 'Games'
       produces 'application/json'
+      parameter name: :id, in: :path, type: :integer, description: 'Game ID'
 
-      parameter name: :id, in: :path, type: :integer, required: true, description: 'Game ID'
-      parameter name: :Authorization, in: :header, type: :string, required: true, description: 'Bearer token for authentication'
-
-      response '200', 'Game details and odds' do
-        let(:Authorization) { "Bearer valid_token" }
-        let(:id) { 1 } # Assuming a game with ID 1 exists
-
-        run_test! do |response|
+      response '200', 'Game retrieved successfully' do
+        let!(:game) { create(:game, home_team: 'Team A', away_team: 'Team B', home_score: 1, away_score: 2, status: 'finished') }
+        run_test! do
+          expect(response).to have_http_status(:ok)
           json_response = JSON.parse(response.body)
           expect(json_response['game']['home_team']).to eq('Team A')
           expect(json_response['game']['away_team']).to eq('Team B')
-          expect(json_response['odds']).to be_present
+          expect(json_response['game']['home_score']).to eq(1)
+          expect(json_response['game']['away_score']).to eq(2)
+          expect(json_response['odds']).to be_present # Assuming odds calculation is in the response
         end
       end
     end

@@ -20,7 +20,16 @@ class GameService
       end
 
       # Paginate the results and convert to JSON format, including events
-      games.page(page).per(per_page).as_json(include: { events: { only: %i[id event_type team minute] } })
+      paginated_games = games.page(page).per(per_page)
+      paginated_games_json = paginated_games.page(page).per(per_page).as_json(include: { events: { only: %i[id event_type team minute] } })
+
+      { games: paginated_games_json, meta: {
+        current_page: paginated_games&.current_page,
+        next_page: paginated_games&.next_page,
+        prev_page: paginated_games&.prev_page,
+        total_pages: paginated_games&.total_pages,
+        total_count: paginated_games&.total_count
+      } }.to_json
     end
   end
 
@@ -32,5 +41,17 @@ class GameService
     # Delete each tracked cache key
     tracked_keys.each { |key| Rails.cache.delete(key) }
     Rails.cache.delete(CACHE_TRACKER_KEY) # Delete the cache tracker key itself
+  end
+
+  private
+
+  def pagination_meta(collection)
+    {
+      current_page: collection&.current_page,
+      next_page: collection&.next_page,
+      prev_page: collection&.prev_page,
+      total_pages: collection&.total_pages,
+      total_count: collection&.total_count
+    }
   end
 end

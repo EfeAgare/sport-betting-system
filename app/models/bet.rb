@@ -6,7 +6,7 @@ class Bet < ApplicationRecord
   validates :amount, numericality: { greater_than: 0, less_than_or_equal_to: ->(bet) { bet.user&.balance || 0 }, message: "exceeds your available balance" }
   validates :bet_type, :pick, :amount, presence: true
 
-  validates :status, inclusion: { in: %w[pending win loss], message: "%{value} is not a valid status" }
+  validates :status, inclusion: { in: %w[pending win loss], message: "%{value} must be type: pending win loss" }
 
   before_validation :set_default_values
 
@@ -23,7 +23,7 @@ class Bet < ApplicationRecord
 
   def update_and_send_leaderboard
     # Update the leaderboard in Redis
-    LeaderboardService.update_leaderboard(user.id, amount, status, created_at)
+    UpdateLeaderboardJob.perform_later(user.id, amount, status, created_at)
 
     # Trigger background job to calculate and send leaderboard
     LeaderboardUpdateJob.perform_later

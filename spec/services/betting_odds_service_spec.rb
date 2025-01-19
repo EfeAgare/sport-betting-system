@@ -44,8 +44,8 @@ RSpec.describe BettingOddsService do
       end
 
       it 'enforces minimum odds' do
-        create(:bet, game: game, pick: 'home', amount: 1000)
-        create(:bet, game: game, pick: 'away', amount: 1)
+        create(:bet, game: game, pick: 'home', amount: 100)
+        create(:bet, game: game, pick: 'away', amount: 10000)
 
         odds = subject.calculate
         expect(odds[:away]).to eq described_class::MIN_ODDS

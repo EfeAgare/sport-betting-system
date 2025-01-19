@@ -39,7 +39,7 @@ class LeaderboardService
 
         {
           id: user_id,
-          username: User.find(user_id).username,
+          username: User.find_by(id: user_id)&.username,
           total_bets: total_bets,
           wins: wins,
           losses: losses,

@@ -1,7 +1,9 @@
 class Api::V1::BetsController < ApplicationController
-  include Validatable
   # Limit bet creation attempts to 5 within 1 minute
-  rate_limit to: 5, within: 1.minute, only: :create, with: -> { render json: { error: "Too many bet attempts. Please try again later." }, status: :too_many_requests }
+  rate_limit to: 5, within: 1.minute, only: :create, with: -> {
+    response.headers["Retry-After"] = 60.to_s
+    render json: { error: "Too many bet attempts. Please try again later." }, status: :too_many_requests
+  }
 
   # Retrieves all bets for the current user,
   # ordered by creation time (newest first).
@@ -23,12 +25,12 @@ class Api::V1::BetsController < ApplicationController
     # Apply pagination
     @bets = @bets.page(params[:page]).per(params[:per_page] || 25)
 
-    render json: @bets, meta: pagination_meta(@bets), status: :ok
+    render json: { bets: @bets, meta: pagination_meta(@bets) }, status: :ok
   end
 
   # Creates a new bet for the current user.
   def create
-    BetValidator.new(bet_params).validate!
+    BetValidator.new(bet_params, required_fields: [ :game_id, :bet_type, :pick, :amount, :odds ]).validate!
 
     # Ensure the user has sufficient balance to place the bet.
     ensure_sufficient_balance!(current_user, bet_params[:amount].to_f)
@@ -65,7 +67,7 @@ class Api::V1::BetsController < ApplicationController
 
     @bets = @bets.page(params[:page]).per(params[:per_page] || 25)
 
-    render json: @bets, meta: pagination_meta(@bets), status: :ok
+    render json: { bets: @bets, meta: pagination_meta(@bets) }, status: :ok
   end
 
   private

@@ -5,13 +5,13 @@ module ApiRoutesConcern
       post "sign_up", to: "registrations#create"
       post "sign_in", to: "sessions#create"
       delete "sign_out", to: "sessions#destroy"
+      get "users/:user_id/bets", to: "bets#history"
 
       # User-related routes
-      resources :users, only: [] do
+      resources :users, only: [ :index ] do
         collection do
-          put "update"
+          patch "update"
         end
-        resources :bets, only: [ :index ]
       end
 
       # Game routes
@@ -22,8 +22,8 @@ module ApiRoutesConcern
       # Event routes
       resources :events, only: [ :update ]
 
-      # Bet creation
-      resources :bets, only: [ :create ]
+      # Bet routes
+      resources :bets, only: [ :index, :create ]
     end
   end
 end

@@ -1,10 +1,12 @@
 class Api::V1::EventsController < ApplicationController
+  allow_unauthenticated_access
   before_action :set_game, only: [ :create ]
   before_action :set_event, only: [ :update ]
 
   # Creates a new event for the specified game
   def create
-    EventValidator.new(event_params).validate!
+    EventValidator.new(event_params, required_fields: [ :event_type, :team, :player, :minute ]).validate!
+
 
     @event = @game.events.build(event_params)
     # This raises ActiveRecord::RecordInvalid automatically if validation fails
@@ -14,7 +16,8 @@ class Api::V1::EventsController < ApplicationController
 
   # Updates an existing event
   def update
-    EventValidator.new(event_params).validate!
+    EventValidator.new(event_params, required_fields: [ :event_type, :team, :player, :minute ]).validate!
+
     # This raises ActiveRecord::RecordInvalid automatically if validation fails
     @event.update!(event_params)
     render json: @event, status: :ok

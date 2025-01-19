@@ -20,4 +20,7 @@ Rails.application.routes.draw do
     #   include ApiRoutesConcern
     # end
   end
+
+   # Catch all route for undefined paths (should be the last one)
+   match "*path", to: "errors#routing_error", via: :all
 end

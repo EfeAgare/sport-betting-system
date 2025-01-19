@@ -1,10 +1,18 @@
 class Api::V1::GamesController < ApplicationController
-  include Validatable
   allow_unauthenticated_access
 
   # Creates a new game and clears any relevant cache
   def create
-    GameValidator.new(game_params).validate!
+    # Specify required fields for this action
+    if  game_params[:events_attributes].present?
+      required_fields = %i[home_team away_team home_score away_score status events_attributes]
+    else
+      required_fields = %i[home_team away_team home_score away_score status]
+    end
+
+    # Pass the parameters and required fields to the validator
+    GameValidator.new(game_params, required_fields: required_fields).validate!
+
     game = Game.new(game_params)
     # This raises ActiveRecord::RecordInvalid automatically if validation fails
     game.save!
@@ -27,7 +35,7 @@ class Api::V1::GamesController < ApplicationController
       end_date: end_date
     )
 
-    render json: games, meta: pagination_meta(games), status: :ok
+    render json: JSON.parse(games)
   end
 
   # Retrieves a single game along with its events and calculated odds
@@ -35,7 +43,7 @@ class Api::V1::GamesController < ApplicationController
     game = Game.includes(:events).find(params[:id])
     odds = game.calculate_odds
 
-    render json: { game: game, odds: odds }, status: :ok
+    render json: { game: game, odds: odds }
   end
 
   private

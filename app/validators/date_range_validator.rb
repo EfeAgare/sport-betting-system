@@ -11,13 +11,13 @@ class DateRangeValidator
   end
 
   def validate!
-    raise ValidationError, errors.full_messages unless valid?
+    raise ValidationError, errors.full_messages.join(", ") unless valid?
   end
 
   private
 
   def date_range_valid
-    return if start_date.nil? || end_date.nil?
+    return true if start_date.nil? || end_date.nil?
 
     begin
       parsed_start = DateTime.parse(start_date.to_s)
@@ -32,6 +32,7 @@ class DateRangeValidator
       end
     rescue ArgumentError
       errors.add(:base, "Invalid date format")
+      false
     end
   end
 end

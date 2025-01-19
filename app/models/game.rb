@@ -10,7 +10,7 @@ class Game < ApplicationRecord
   validates :home_team, :away_team, presence: true
   validates :home_score, :away_score, :time_elapsed, presence: true
 
-  validates :status, inclusion: { in: %w[scheduled ongoing paused finished cancelled postponed abandoned] }
+  validates :status, inclusion: { in: %w[scheduled ongoing paused finished cancelled postponed abandoned], message: "%{value} must be type: scheduled ongoing paused finished cancelled postponed abandoned " }
   accepts_nested_attributes_for :events
 
   after_initialize :set_default_status, if: :new_record?

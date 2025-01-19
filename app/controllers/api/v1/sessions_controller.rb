@@ -2,11 +2,14 @@ class Api::V1::SessionsController < ApplicationController
   allow_unauthenticated_access except: [ :destroy ]
 
   # Limit login attempts to 5 within 1 minute
-  rate_limit to: 5, within: 1.minute, only: :create, with: -> { render json: { error: "Too many login attempts. Please try again later." }, status: :too_many_requests }
+  rate_limit to: 5, within: 1.minute, only: :create, with: -> {
+    response.headers["Retry-After"] = 240.to_s
+    render json: { error: "Too many login attempts. Please try again later." }, status: :too_many_requests
+  }
 
   # Authenticates user and generates a token if credentials are valid
   def create
-    SessionValidator.new(user_params).validate!
+    UserValidator.new(user_params, required_fields: [ :email, :password ]).validate!
     user = User.find_by(email: user_params[:email])
 
     if user&.authenticate(user_params[:password])

@@ -29,8 +29,7 @@ This application is a sports betting platform that allows users to register, pla
 - **BetValidator**: Validates the parameters for creating a bet, ensuring all required fields are present and valid.
 - **EventValidator**: Validates the parameters for creating and updating events.
 - **GameValidator**: Validates the parameters for creating a game.
-- **RegistrationValidator**: Validates user registration parameters.
-- **SessionValidator**: Validates user login parameters.
+- **UserValidator**: Validates user registration, login and update parameters.
 
 ### 5. Middleware
 - **Authenticable**: Provides methods for user authentication, including token validation and user retrieval.
