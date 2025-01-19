@@ -52,7 +52,10 @@ rspec 'relative path to file'
 ## API Documentation
 Visit the API documentation at:
 ```
-base_url/api-docs/index.html
+http://localhost:3000/api-docs/index.html
+
+
+https://github.com/EfeAgare/sport-betting-system/blob/main/swagger/v1/swagger.yaml
 ```
 
 ## Architecture
