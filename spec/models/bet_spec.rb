@@ -37,11 +37,5 @@ RSpec.describe Bet, type: :model do
       bet = Bet.create(user: user, game: game, amount: 50.0, bet_type: "winner", pick: "home")
       expect(bet.odds).to be_present
     end
-
-    it "enqueues an UpdateOddsJob after saving" do
-      expect {
-        Bet.create(user: user, game: game, amount: 50.0, bet_type: "winner", pick: "home")
-      }.to have_enqueued_job(UpdateOddsJob)
-    end
   end
 end

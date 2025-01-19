@@ -1,416 +1,845 @@
----
-openapi: 3.0.1
-info:
-  title: API V1
-  version: v1
-paths:
-  "/api/v1/bets":
-    post:
-      summary: Create a new bet
-      tags:
-      - Bets
-      security:
-      - bearer_auth: []
-      parameters: []
-      responses:
-        '201':
-          description: Bet created successfully
-        '422':
-          description: Invalid parameters
-        '401':
-          description: Unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                bet:
-                  type: object
-                  properties:
-                    game_id:
-                      type: integer
-                    bet_type:
-                      type: string
-                      enum:
-                      - winner
-                      - spread
-                      - over_under
-                      example: winner
-                    pick:
-                      type: string
-                      example: home
-                    amount:
-                      type: number
-                      example: 50.0
-                  required:
-                  - game_id
-                  - bet_type
-                  - pick
-                  - amount
-              required:
-              - bet
-  "/api/v1/games/{game_id}/events":
-    post:
-      summary: Create a new Event
-      tags:
-      - Events
-      security:
-      - Bearer: []
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        description: Bearer token for authentication
-        schema:
-          type: string
-      - name: game_id
-        in: path
-        required: true
-        description: ID of the game
-        schema:
-          type: integer
-      responses:
-        '201':
-          description: Event created successfully
-        '422':
-          description: Invalid event parameters
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                event:
-                  type: object
-                  properties:
-                    event_type:
-                      type: string
-                      example: goal
-                      description: Type of the event
-                    team:
-                      type: string
-                      example: home
-                      description: Team associated with the event (home/away)
-                    player:
-                      type: string
-                      example: Player 1
-                      description: Player associated with the event
-                    minute:
-                      type: integer
-                      example: 10
-                      description: Minute when the event occurred
-                  required:
-                  - event_type
-                  - team
-                  - player
-                  - minute
-  "/api/v1/events/{id}":
-    patch:
-      summary: Update an Event
-      tags:
-      - Events
-      security:
-      - Bearer: []
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        description: Bearer token for authentication
-        schema:
-          type: string
-      - name: id
-        in: path
-        required: true
-        description: ID of the event
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: Event updated successfully
-        '422':
-          description: Invalid event parameters
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                event:
-                  type: object
-                  properties:
-                    minute:
-                      type: integer
-                      example: 15
-                      description: Updated minute for the event
-                  required:
-                  - minute
-  "/api/v1/games":
-    post:
-      summary: Create a new Game
-      tags:
-      - Games
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        description: Bearer token for authentication
-        schema:
-          type: string
-      responses:
-        '201':
-          description: Game created with events successfully
-        '422':
-          description: Invalid game parameters
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                game:
-                  type: object
-                  properties:
-                    home_team:
-                      type: string
-                      example: Team A
-                      description: Home team name
-                    away_team:
-                      type: string
-                      example: Team B
-                      description: Away team name
-                    home_score:
-                      type: integer
-                      example: 0
-                      description: Home team score
-                    away_score:
-                      type: integer
-                      example: 0
-                      description: Away team score
-                    time_elapsed:
-                      type: integer
-                      example: 0
-                      description: Time elapsed in the game
-                    status:
-                      type: string
-                      example: scheduled
-                      description: Status of the game (e.g., scheduled, ongoing, completed)
-                    events_attributes:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          event_type:
-                            type: string
-                            example: goal
-                            description: Type of event (e.g., goal, foul)
-                          team:
-                            type: string
-                            example: home
-                            description: Team associated with the event
-                          player:
-                            type: string
-                            example: Player 1
-                            description: Player who made the event
-                          minute:
-                            type: integer
-                            example: 10
-                            description: Minute in which the event occurred
-                        required:
-                        - event_type
-                        - team
-                        - player
-                        - minute
-                  required:
-                  - home_team
-                  - away_team
-                  - status
-              required:
-              - game
-    get:
-      summary: Get list of games
-      tags:
-      - Games
-      responses:
-        '200':
-          description: List of games
-  "/api/v1/games/{id}":
-    get:
-      summary: Show a game by ID
-      tags:
-      - Games
-      parameters:
-      - name: id
-        in: path
-        required: true
-        description: Game ID
-        schema:
-          type: integer
-      - name: Authorization
-        in: header
-        required: true
-        description: Bearer token for authentication
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Game details and odds
-  "/api/v1/sign_up":
-    post:
-      summary: Registers a new user
-      tags:
-      - Registrations
-      parameters: []
-      responses:
-        '201':
-          description: user created successfully
-        '422':
-          description: invalid parameters
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                user:
-                  type: object
-                  properties:
-                    email:
-                      type: string
-                      example: test@example.com
-                      description: Email address of the user
-                    password:
-                      type: string
-                      example: password
-                      description: Password for the user
-                    username:
-                      type: string
-                      example: testuser
-                      description: Username for the user
-                    balance:
-                      type: number
-                      example: 100
-                      description: Initial balance for the user
-                  required:
-                  - email
-                  - password
-                  - username
-                  - balance
-        required: true
-  "/api/v1/sign_in":
-    post:
-      summary: Log in a user
-      tags:
-      - Sessions
-      parameters: []
-      responses:
-        '201':
-          description: user logged in successfully
-        '401':
-          description: invalid credentials
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                user:
-                  type: object
-                  properties:
-                    email:
-                      type: string
-                      example: test@example.com
-                      description: Email address of the user
-                    password:
-                      type: string
-                      example: password
-                      description: Password for the user
-                  required:
-                  - email
-                  - password
-        required: true
-  "/api/v1/sign_out":
-    delete:
-      summary: Log out a user
-      tags:
-      - Sessions
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        schema:
-          type: string
-          example: Bearer {token}
-          description: Authorization token for the logged-in user
-      responses:
-        '200':
-          description: user logged out successfully
-  "/api/v1/users":
-    get:
-      summary: List users with pagination
-      tags:
-      - Users
-      parameters:
-      - name: page
-        in: query
-        required: false
-        description: Page number for pagination
-        schema:
-          type: integer
-      - name: per_page
-        in: query
-        required: false
-        description: Number of users per page
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: default number of users when per_page is not specified
-  "/api/v1/users/update":
-    put:
-      summary: Update user details
-      tags:
-      - Users
-      parameters:
-      - name: Authorization
-        in: header
-        required: true
-        description: Bearer token for authentication
-        schema:
-          type: string
-      responses:
-        '200':
-          description: user updated successfully
-        '401':
-          description: unauthorized access
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                user:
-                  type: object
-                  properties:
-                    username:
-                      type: string
-                      example: UpdatedName
-                      description: New username for the user
-                    balance:
-                      type: string
-                      example: '1000.5'
-                      description: Updated balance for the user
-                  required:
-                  - username
-                  - balance
-        required: true
-securityDefinitions:
-  Bearer:
-    type: apiKey
-    name: Authorization
-    in: header
-servers:
-- url: http://{defaultHost}
-  variables:
-    defaultHost:
-      default: localhost:3000
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "API V1",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/bets": {
+      "post": {
+        "summary": "Create a new bet",
+        "tags": [
+          "Bets"
+        ],
+        "parameters": [
+          {
+            "name": "Api-Version",
+            "in": "header",
+            "required": true,
+            "example": "1",
+            "description": "API version to use",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Bet created successfully"
+          },
+          "422": {
+            "description": "Invalid parameters"
+          },
+          "423": {
+            "description": "Insufficient balance"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bet": {
+                    "type": "object",
+                    "required": [
+                      "game_id",
+                      "bet_type",
+                      "pick",
+                      "amount",
+                      "odds"
+                    ],
+                    "properties": {
+                      "game_id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "bet_type": {
+                        "type": "string",
+                        "example": "moneyline"
+                      },
+                      "pick": {
+                        "type": "string",
+                        "example": "away"
+                      },
+                      "amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 50.0
+                      },
+                      "odds": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 2.0
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "bet"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Retrieve all bets",
+        "tags": [
+          "Bets"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved all bets"
+          }
+        }
+      }
+    },
+    "/api/games/{game_id}/events": {
+      "post": {
+        "summary": "Create an event for a game",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "name": "Api-Version",
+            "in": "header",
+            "required": true,
+            "example": "1",
+            "description": "API version to use",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "game_id",
+            "in": "path",
+            "description": "Game ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Event created successfully"
+          },
+          "422": {
+            "description": "Invalid parameters"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event": {
+                    "type": "object",
+                    "properties": {
+                      "event_type": {
+                        "type": "string",
+                        "example": "goal"
+                      },
+                      "team": {
+                        "type": "string",
+                        "example": "home"
+                      },
+                      "player": {
+                        "type": "string",
+                        "example": "Player X"
+                      },
+                      "minute": {
+                        "type": "integer",
+                        "example": 42
+                      }
+                    },
+                    "required": [
+                      "event_type",
+                      "team",
+                      "player",
+                      "minute"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/events/{id}": {
+      "patch": {
+        "summary": "Update an event",
+        "tags": [
+          "Events"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Event ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event updated successfully"
+          },
+          "422": {
+            "description": "Invalid parameters"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "event": {
+                    "type": "object",
+                    "properties": {
+                      "event_type": {
+                        "type": "string",
+                        "example": "goal"
+                      },
+                      "team": {
+                        "type": "string",
+                        "example": "away"
+                      },
+                      "player": {
+                        "type": "string",
+                        "example": "Player Y"
+                      },
+                      "minute": {
+                        "type": "integer",
+                        "example": 60
+                      }
+                    },
+                    "required": [
+                      "event_type",
+                      "team",
+                      "player",
+                      "minute"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/games": {
+      "post": {
+        "summary": "Create a new Game",
+        "tags": [
+          "Games"
+        ],
+        "parameters": [
+          {
+            "name": "Api-Version",
+            "in": "header",
+            "required": true,
+            "example": "1",
+            "description": "API version to use",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Game created successfully"
+          },
+          "422": {
+            "description": "Invalid request"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "home_team": {
+                    "type": "string"
+                  },
+                  "away_team": {
+                    "type": "string"
+                  },
+                  "home_score": {
+                    "type": "integer"
+                  },
+                  "away_score": {
+                    "type": "integer"
+                  },
+                  "status": {
+                    "type": "string"
+                  },
+                  "events_attributes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "event_type": {
+                          "type": "string"
+                        },
+                        "team": {
+                          "type": "string"
+                        },
+                        "player": {
+                          "type": "string"
+                        },
+                        "minute": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "event_type",
+                        "team",
+                        "player",
+                        "minute"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "home_team",
+                  "away_team",
+                  "home_score",
+                  "away_score",
+                  "status"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "summary": "Retrieves a list of games",
+        "tags": [
+          "Games"
+        ],
+        "parameters": [
+          {
+            "name": "start_date",
+            "in": "query",
+            "format": "date",
+            "description": "Start date for filtering games",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "format": "date",
+            "description": "End date for filtering games",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number for pagination",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Number of items per page",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of games retrieved successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/games/{id}": {
+      "get": {
+        "summary": "Retrieves a single game",
+        "tags": [
+          "Games"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Game ID",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Game retrieved successfully"
+          }
+        }
+      }
+    },
+    "/sign_up": {
+      "post": {
+        "summary": "Registers a new user",
+        "tags": [
+          "User Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "Api-Version",
+            "in": "header",
+            "required": true,
+            "example": "1",
+            "description": "API version to use",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User created successfully"
+          },
+          "422": {
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Too many requests"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "example": "user@example.com"
+                      },
+                      "password": {
+                        "type": "string",
+                        "example": "password123"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "new_user"
+                      }
+                    },
+                    "required": [
+                      "email",
+                      "password",
+                      "username"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sign_in": {
+      "post": {
+        "summary": "Authenticates a user",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [
+          {
+            "name": "Api-Version",
+            "in": "header",
+            "required": true,
+            "example": "1",
+            "description": "API version",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User authenticated successfully"
+          },
+          "401": {
+            "description": "Invalid credentials"
+          },
+          "429": {
+            "description": "Too many requests"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "email": {
+                        "type": "string",
+                        "example": "user@example.com"
+                      },
+                      "password": {
+                        "type": "string",
+                        "example": "password123"
+                      }
+                    },
+                    "required": [
+                      "email",
+                      "password"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sign_out": {
+      "delete": {
+        "summary": "Logs out a user",
+        "tags": [
+          "Authentication"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "example": "Bearer {token}",
+            "description": "JWT Token for authentication",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Api-Version",
+            "in": "header",
+            "required": true,
+            "example": "1",
+            "description": "API version",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User logged out successfully"
+          },
+          "401": {
+            "description": "Invalid token provided"
+          }
+        }
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "summary": "List users with pagination and filtering",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "Api-Version",
+            "in": "header",
+            "required": true,
+            "example": "1",
+            "description": "API version",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "description": "Users per page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "format": "date",
+            "description": "Filter by start date",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "format": "date",
+            "description": "Filter by end date",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "balance": {
+                            "type": "number"
+                          },
+                          "created_at": {
+                            "type": "string",
+                            "format": "date_time"
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total_count": {
+                          "type": "integer"
+                        },
+                        "total_pages": {
+                          "type": "integer"
+                        },
+                        "current_page": {
+                          "type": "integer"
+                        },
+                        "prev_page": {
+                          "type": "integer",
+                          "nullable": true
+                        },
+                        "next_page": {
+                          "type": "integer",
+                          "nullable": true
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        },
+                        "code": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/update": {
+      "patch": {
+        "summary": "Update user details",
+        "tags": [
+          "Users"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "description": "Bearer token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "username": {
+                      "type": "string"
+                    },
+                    "balance": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate-limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "type": "object",
+                    "properties": {
+                      "username": {
+                        "type": "string"
+                      },
+                      "balance": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "username",
+                      "balance"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    },
+    "ApiVersion": {
+      "type": "apiKey",
+      "name": "Api-Version",
+      "in": "header",
+      "description": "Set the API version you are targeting (e.g., 1, 2, etc.)."
+    }
+  },
+  "servers": [
+    {
+      "url": "http://{defaultHost}",
+      "variables": {
+        "defaultHost": {
+          "default": "localhost:3000"
+        }
+      }
+    }
+  ]
+}

@@ -27,6 +27,12 @@ RSpec.configure do |config|
           type: 'apiKey',
           name: 'Authorization',
           in: 'header'
+        },
+        ApiVersion: {
+          type: :apiKey,
+          name: 'Api-Version',
+          in: :header,
+          description: 'Set the API version you are targeting (e.g., 1, 2, etc.).'
         }
       },
       servers: [
@@ -46,5 +52,5 @@ RSpec.configure do |config|
   # The openapi_specs configuration option has the filename including format in
   # the key, this may want to be changed to avoid putting yaml in json files.
   # Defaults to json. Accepts ':json' and ':yaml'.
-  config.openapi_format = :yaml
+  config.openapi_format = :json
 end

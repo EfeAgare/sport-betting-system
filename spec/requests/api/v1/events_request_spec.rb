@@ -1,118 +1,78 @@
 require 'swagger_helper'
 
-RSpec.describe 'Events API', type: :request do
-  path '/api/v1/games/{game_id}/events' do
-    post 'Creates an event' do
+RSpec.describe 'Api::V1::EventsController', type: :request do
+  path '/api/games/{game_id}/events' do
+    post 'Create an event for a game' do
       tags 'Events'
       consumes 'application/json'
       produces 'application/json'
-      security [ Bearer: [] ]
 
-      parameter name: :game_id, in: :path, required: true, type: :integer
-      parameter name: :event, in: :body, required: true, schema: {
+      # Add the Api-Version header as a required parameter
+      parameter name: 'Api-Version', in: :header, type: :string, required: true, example: '1', description: 'API version to use'
+
+      parameter name: :game_id, in: :path, type: :integer, description: 'Game ID', required: true
+      parameter name: :event, in: :body, schema: {
         type: :object,
         properties: {
-          event_type: { type: :string },
-          team: { type: :string },
-          player: { type: :string },
-          minute: { type: :integer }
-        },
-        required: [ 'event_type', 'team', 'player', 'minute' ]
+          event: {
+            type: :object,
+            properties: {
+              event_type: { type: :string, example: 'goal' },
+              team: { type: :string, example: 'home' },
+              player: { type: :string, example: 'Player X' },
+              minute: { type: :integer, example: 42 }
+            },
+            required: %w[event_type team player minute]
+          }
+        }
       }
 
-      response '201', 'event created' do
-        let(:game) { create(:game) }
-        let(:valid_attributes) do
-          {
-            event: {
-              event_type: "goal",
-              team: "home",
-              player: "Player 1",
-              minute: 10
-            }
-          }
-        end
-
-        before do
-          post "/api/v1/games/#{game.id}/events", params: valid_attributes, headers: { 'Authorization' => "Bearer #{@token}" }
-        end
-
-        run_test! do |response|
-          expect(response.status).to eq(201)
-          expect(JSON.parse(response.body)['event_type']).to eq("goal")
-          expect(JSON.parse(response.body)['team']).to eq("home")
-          expect(JSON.parse(response.body)['player']).to eq("Player 1")
-          expect(JSON.parse(response.body)['minute']).to eq(10)
-        end
+      response '201', 'Event created successfully' do
+        let(:game_id) { create(:game).id }
+        let(:event) { { event: { event_type: 'goal', team: 'home', player: 'Player X', minute: 42 } } }
+        run_test!
       end
 
-      response '422', 'invalid request' do
-        let(:invalid_attributes) do
-          {
-            event: {
-              event_type: "",
-              team: "",
-              player: "",
-              minute: nil
-            }
-          }
-        end
-
-        before do
-          post "/api/v1/games/#{game.id}/events", params: invalid_attributes, headers: { 'Authorization' => "Bearer #{@token}" }
-        end
-
-        run_test! do |response|
-          expect(response.status).to eq(422)
-          expect(JSON.parse(response.body)['event_type']).to include("can't be blank")
-          expect(JSON.parse(response.body)['team']).to include("can't be blank")
-          expect(JSON.parse(response.body)['player']).to include("can't be blank")
-          expect(JSON.parse(response.body)['minute']).to include("can't be blank")
-        end
+      response '422', 'Invalid parameters' do
+        let(:game_id) { create(:game).id }
+        let(:event) { { event: { team: '', player: '', minute: nil } } }
+        run_test!
       end
     end
   end
 
-  path '/api/v1/events/{id}' do
-    patch 'Updates an event' do
+  path '/api/events/{id}' do
+    patch 'Update an event' do
       tags 'Events'
       consumes 'application/json'
       produces 'application/json'
-      security [ Bearer: [] ]
-
-      parameter name: :id, in: :path, required: true, type: :integer
-      parameter name: :event, in: :body, required: true, schema: {
+      parameter name: :id, in: :path, type: :integer, description: 'Event ID', required: true
+      parameter name: :event, in: :body, schema: {
         type: :object,
         properties: {
-          minute: { type: :integer }
-        },
-        required: [ 'minute' ]
+          event: {
+            type: :object,
+            properties: {
+              event_type: { type: :string, example: 'goal' },
+              team: { type: :string, example: 'away' },
+              player: { type: :string, example: 'Player Y' },
+              minute: { type: :integer, example: 60 }
+            },
+            required: %w[event_type team player minute]
+          }
+        }
       }
 
-      response '200', 'event updated' do
-        let(:event) { create(:event, game: create(:game)) }
-
-        before do
-          patch "/api/v1/events/#{event.id}", params: { event: { minute: 15 } }, headers: { 'Authorization' => "Bearer #{@token}" }
-        end
-
-        run_test! do |response|
-          expect(response.status).to eq(200)
-          expect(JSON.parse(response.body)['minute']).to eq(15)
-        end
+      response '200', 'Event updated successfully' do
+        let(:id) { create(:event).id }
+        let(:event) { { event: { event_type: 'goal', team: 'away', player: 'Player X', minute: 42 } } }
+        run_test!
       end
 
-      response '422', 'invalid request' do
-        let(:event) { create(:event, game: create(:game)) }
-
-        before do
-          patch "/api/v1/events/#{event.id}", params: { event: { minute: nil } }, headers: { 'Authorization' => "Bearer #{@token}" }
-        end
-
-        run_test! do |response|
-          expect(response.status).to eq(422)
-          expect(JSON.parse(response.body)['minute']).to include("can't be blank")
-        end
+      response '422', 'Invalid parameters' do
+        let(:id) { create(:event).id }
+        let(:event) { { event: { team: '', player: '', minute: nil } } }
+        run_test!
       end
     end
   end

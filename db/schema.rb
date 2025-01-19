@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_01_17_023846) do
+ActiveRecord::Schema[8.0].define(version: 2025_01_19_195833) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,11 +19,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_17_023846) do
     t.bigint "game_id", null: false
     t.string "bet_type"
     t.string "pick"
-    t.decimal "amount"
+    t.decimal "amount", precision: 15, scale: 2, default: "0.0"
     t.decimal "odds"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "status", default: "pending"
+    t.index ["amount"], name: "index_bets_on_amount"
+    t.index ["created_at"], name: "index_bets_on_created_at"
     t.index ["game_id"], name: "index_bets_on_game_id"
+    t.index ["status"], name: "index_bets_on_status"
     t.index ["user_id"], name: "index_bets_on_user_id"
   end
 
@@ -48,6 +52,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_17_023846) do
     t.string "status", default: "scheduled", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_games_on_created_at"
     t.index ["game_id"], name: "index_games_on_game_id", unique: true
   end
 
@@ -55,6 +60,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_01_17_023846) do
     t.string "jti", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_jwt_blacklists_on_jti", unique: true
   end
 
   create_table "users", force: :cascade do |t|

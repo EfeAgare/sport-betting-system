@@ -71,26 +71,41 @@ class MockGameDataService
     game = Game.find_by(id: game_id)
     return nil unless game
 
-    bet_id = "B#{Bet.count + 1}"
-    odds = (1 + rand * 4).round(2) # Generate random odds between 1.00 and 5.00
-
+    # Create the bet with a pending status initially
     new_bet = Bet.create!(
       user_id: user.id,
       game_id: game.id,
       bet_type: bet_type,
       pick: pick,
       amount: amount,
-      odds: odds
+      odds: (1 + rand * 4).round(2), # Generate random odds between 1.00 and 5.00
+      status: "pending" # Set initial status to pending
     )
 
     # Deduct the amount from the user's balance
     user.update(balance: user.balance - amount)
 
+    # Determine the outcome of the bet (for simulation purposes)
+    bet_outcome = determine_bet_outcome(new_bet) # This method should determine if the bet is a win or loss
+
+    # Update the bet status based on the outcome
+    new_bet.update(status: bet_outcome)
+
+    # Update the leaderboard in Redis
+    LeaderboardService.update_leaderboard(user.id, amount, bet_outcome, new_bet.created_at)
+
     # Publish the game update and leaderboard updates to Redis
     publish_game_update(new_bet)
-    publish_leaderboard_update(user)
+    publish_leaderboard_update
 
     new_bet
+  end
+
+  def determine_bet_outcome(bet)
+    # Simulate the outcome of the bet (this should be based on actual game results)
+    # For example, if the bet is a win, return 'win', otherwise return 'loss'
+    # This is a placeholder; implement your actual logic here
+    rand < 0.5 ? "win" : "loss" # Randomly determine win/loss for simulation
   end
 
   # Publish game updates to the 'game_updates' Redis channel
@@ -100,9 +115,10 @@ class MockGameDataService
   end
 
   # Publish leaderboard updates to the 'leaderboard_updates' Redis channel
-  def publish_leaderboard_update(user)
-    # Fetch top users sorted by balance
-    leaderboard = User.order(balance: :desc).limit(10).pluck(:id, :username, :balance)
+  def publish_leaderboard_update(start_date: nil, end_date: nil, page: 1, per_page: 25)
+    # Fetch the leaderboard data based on the provided parameters
+    leaderboard = LeaderboardService.calculate(start_date: start_date, end_date: end_date, page: page, per_page: per_page)
+
     # Publish leaderboard updates to the Redis channel
     $redis.publish("leaderboard_updates", leaderboard.to_json)
   end

@@ -1,0 +1,1 @@
+class InvalidBetError < ApiError; end
