@@ -36,7 +36,7 @@ The system should allow users to place bets, update odds dynamically, and mainta
    redis-server
    ```
    ```
-   sidekiq
+   bundle exec sidekiq
    ```
 
 ## Test 

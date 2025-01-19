@@ -3,7 +3,7 @@ class EventValidator
 
   attr_accessor :team, :event_type, :minute, :player, :required_fields
 
-  validates :event_type, presence: true, inclusion: { in: %w[goal yellow_card red_card substitution injury], message: "must be one of: goal yellow_card red_card substitution injury" }, if: -> { required?(:event_type) }
+  validates :event_type, presence: true, inclusion: { in: %w[goal yellow_card red_card substitution injury foul corner], message: "must be one of: goal yellow_card red_card substitution injury foul corner" }, if: -> { required?(:event_type) }
   validates :team, presence: true, inclusion: { in: %w[home away], message: "must be one of: home away" }, if: -> { required?(:team) }
   validates :player, presence: true, length: { minimum: 2, maximum: 50 }, if: -> { required?(:player) }
   validates :minute, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 120 }, if: -> { required?(:minute) }

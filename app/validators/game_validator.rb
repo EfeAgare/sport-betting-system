@@ -21,6 +21,8 @@ class GameValidator
     @status = params[:status]
     @events_attributes = params[:events_attributes]
     @required_fields = required_fields
+
+    set_default_status
   end
 
   def validate!
@@ -46,5 +48,10 @@ class GameValidator
         end
       end
     end
+  end
+
+  def set_default_status
+    # Set the default status of the game to "scheduled".
+    @status ||= "scheduled"
   end
 end

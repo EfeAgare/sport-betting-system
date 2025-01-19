@@ -4,7 +4,7 @@ class BetValidator
   attr_accessor :game_id, :bet_type, :pick, :amount, :odds, :required_fields
 
   validates :game_id, presence: true, numericality: { only_integer: true }, if: -> { required?(:game_id) }
-  validates :bet_type, presence: true, inclusion: { in: %w[moneyline spread totals],  message: "must be one of: moneyline, spread, or totals" },  if: -> { required?(:bet_type) }
+  validates :bet_type, presence: true, if: -> { required?(:bet_type) }
   validates :pick, presence: true, inclusion: { in: %w[home away draw over under],  message: "must be one of: home away draw over under" }, if: -> { required?(:pick) }
   validates :amount, presence: true, numericality: { greater_than: 0 }, if: -> { required?(:amount) }
   validates :odds, presence: true, numericality: { greater_than: 1.0, less_than_or_equal_to: 5.0 }, if: -> { required?(:odds) }
